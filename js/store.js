@@ -1,7 +1,10 @@
 // 설정(localStorage) 저장.
 const SETTINGS_KEY = 'air-drum-settings';
 const DEFAULTS = {
-  thr: 0.12,            // 타격으로 보는 마이크 진폭 기준
+  hitMode: 'mic',       // mic: 치는 소리로 인식 | cam: 손 움직임만으로 인식
+  airSpeed: 0.8,        // 카메라 방식: 손이 내려오는 속도 기준 (화면 높이/초)
+  stick: 1,             // 손목→손끝 길이의 몇 배만큼 더 뻗은 곳을 스틱 끝으로 볼지
+  thr: 0.12,           // 타격으로 보는 마이크 진폭 기준
   refractoryMs: 60,     // 한 번 친 뒤 다시 감지하기까지의 최소 간격
   guard: 0.15,          // 소리를 낸 직후 잠깐 올리는 기준값 (스피커 되울림 방지)
   echoCancel: false,

@@ -34,6 +34,24 @@
     </div>
 
     <div class="row">
+      <label for="hitMode">타격 인식 방식</label>
+      <select id="hitMode">
+        <option value="mic">소리 (책상·쿠션을 실제로 침)</option>
+        <option value="cam">카메라만 (허공에서 휘두름)</option>
+      </select>
+    </div>
+    <div class="row">
+      <label for="airSpeed">카메라만: 휘두르는 속도 기준 <output id="airSpeed-out"></output></label>
+      <input id="airSpeed" type="range" min="0.2" max="3" step="0.05">
+      <p class="hint">손을 내리치다 멈추는 순간 소리가 납니다. 살짝 움직여도 울리면 올리고, 세게 쳐야만 울리면 내리세요.</p>
+    </div>
+    <div class="row">
+      <label for="stick">스틱 길이 <output id="stick-out"></output></label>
+      <input id="stick" type="range" min="0" max="4" step="0.1">
+      <p class="hint">초록 동그라미가 연필·스틱 끝에 오도록 맞추세요. 맨손이면 0.</p>
+    </div>
+
+    <div class="row">
       <label for="thr">타격 기준 <output id="thr-out"></output></label>
       <div class="meter"><span id="level-fill"></span><i id="level-line"></i></div>
       <input id="thr" type="range" min="0.02" max="0.6" step="0.01">

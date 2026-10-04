@@ -1,7 +1,7 @@
 // 화면 구성과 모듈 연결: 마이크 타격 → 손 위치로 드럼 선택 → 소리.
 import { initAudio, play } from './synth.js';
 import { startOnset, configOnset, guardOnset } from './onset.js';
-import { startPose, hitPoint } from './pose.js';
+import { startPose, hitPoint, setStick } from './pose.js';
 import { DRUM_NAMES, LAYOUTS, buildZones, zoneAt } from './kit.js';
 import { loadSettings, saveSettings } from './store.js';
 
@@ -9,6 +9,7 @@ const $ = id => document.getElementById(id);
 const METER_MAX = 0.6;      // 레벨 막대와 기준 슬라이더의 최대값
 const GUARD_SEC = 0.12;
 const KNEE_COOLDOWN_MS = 150;
+const AIR_COOLDOWN_MS = 120;
 
 const settings = loadSettings();
 let zones = [];
@@ -27,7 +28,7 @@ function renderZones() {
   box.replaceChildren(...zones.map(z => {
     const el = document.createElement('div');
     el.className = 'zone';
-    el.textContent = DRUM_NAMES[z.drum];
+    el.innerHTML = `<div class="pad ${z.drum}"></div><span>${DRUM_NAMES[z.drum]}</span>`;
     el.style.cssText = `left:${z.x * 100}%;top:${z.y * 100}%;width:${z.w * 100}%;height:${z.h * 100}%`;
     // 화면을 직접 눌러도 소리가 난다 (소리 확인용)
     el.addEventListener('pointerdown', () => hit(z, 0.8));
@@ -59,6 +60,7 @@ function onMicHit({ peak, lowRatio }) {
   $('last-low').textContent = lowRatio.toFixed(2);
 
   if (settings.kickMode === 'mic' && lowRatio > settings.kickRatio) return hit(kickZone(), vel, info);
+  if (settings.hitMode !== 'mic') return;
 
   // 손이 안 보이면 스네어로 친다
   const p = camOn ? hitPoint() : null;
@@ -77,6 +79,25 @@ function onMicLevel(peak) {
 // ---- 카메라 ----
 
 const knees = { kneeL: { armed: false, last: 0 }, kneeR: { armed: false, last: 0 } };
+const air = { handL: { armed: false, peak: 0, last: 0 }, handR: { armed: false, peak: 0, last: 0 } };
+
+// 카메라만 쓰는 방식: 손이 빠르게 내려오다 멈추는 순간을 타격으로 본다
+function detectAirHits(points, now) {
+  for (const [name, a] of Object.entries(air)) {
+    const p = points[name];
+    if (!p) { a.armed = false; continue; }
+    if (p.vy > settings.airSpeed) {
+      a.peak = a.armed ? Math.max(a.peak, p.vy) : p.vy;
+      a.armed = true;
+    } else if (a.armed && p.vy < settings.airSpeed * 0.2) {
+      a.armed = false;
+      if (now - a.last < AIR_COOLDOWN_MS) continue;
+      a.last = now;
+      const zone = zoneAt(zones, displayX(p.x), p.y);
+      if (zone) hit(zone, Math.min(1, Math.max(0.3, a.peak / 3)), '(카메라)');
+    }
+  }
+}
 
 function onPoseFrame(points, now) {
   frames++;
@@ -87,6 +108,7 @@ function onPoseFrame(points, now) {
     if (p) { el.style.left = `${displayX(p.x) * 100}%`; el.style.top = `${p.y * 100}%`; }
   }
 
+  if (settings.hitMode === 'cam') detectAirHits(points, now);
   if (settings.kickMode !== 'knee') return;
   // 무릎이 빠르게 내려오다 멈추는 순간(발이 바닥에 닿음)을 킥으로 본다
   for (const [name, k] of Object.entries(knees)) {
@@ -117,12 +139,15 @@ const SLIDERS = {
   thr: v => v.toFixed(2),
   refractoryMs: v => `${v}ms`,
   guard: v => v.toFixed(2),
+  airSpeed: v => v.toFixed(2),
+  stick: v => v.toFixed(1),
   kickRatio: v => v.toFixed(2),
   kneeSpeed: v => v.toFixed(2),
 };
 
 function applySettings() {
   configOnset(settings.thr, settings.refractoryMs / 1000);
+  setStick(settings.stick);
   $('level-line').style.left = `${settings.thr / METER_MAX * 100}%`;
   renderZones();
   saveSettings(settings);
@@ -138,7 +163,7 @@ function initSettings() {
     show();
     input.addEventListener('input', () => { settings[key] = Number(input.value); show(); applySettings(); });
   }
-  for (const key of ['layout', 'kickMode']) {
+  for (const key of ['hitMode', 'layout', 'kickMode']) {
     $(key).value = settings[key];
     $(key).addEventListener('change', () => { settings[key] = $(key).value; applySettings(); });
   }

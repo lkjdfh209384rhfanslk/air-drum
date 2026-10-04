@@ -29,10 +29,24 @@ body { -webkit-user-select: none; user-select: none; touch-action: manipulation;
 .stage.mirror video { transform: scaleX(-1); }
 
 .zones { position: absolute; inset: 0; }
-.zone { position: absolute; display: flex; align-items: flex-end; justify-content: center; padding: 10px;
-  border: 2px solid rgba(255,255,255,.45); background: rgba(0,0,0,.18); color: #fff; font-size: 20px; font-weight: 700;
+.zone { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  container-type: size; border: 1px dashed rgba(255,255,255,.25); color: #fff; font-size: 18px; font-weight: 700;
   text-shadow: 0 1px 3px #000; cursor: pointer; }
-.zone.hit { background: rgba(59,130,246,.55); border-color: #fff; }
+
+/* 드럼 모양: 구역 안에 들어가는 가장 큰 원 */
+.pad { width: 78cqmin; height: 78cqmin; flex: none; border-radius: 50%; opacity: .82; transition: transform .12s, filter .12s;
+  box-shadow: 0 6px 18px rgba(0,0,0,.6); }
+.pad.snare, .pad.tom, .pad.floor { border: 5px solid #d4d4d8;
+  background: radial-gradient(circle, #fafaf5 0 58%, #e4e4dc 60% 64%, var(--shell) 66% 100%); }
+.pad.snare { --shell: #71717a; }
+.pad.tom { --shell: #b91c1c; }
+.pad.floor { --shell: #7f1d1d; }
+.pad.kick { border: 6px solid #d4d4d8;
+  background: radial-gradient(circle, #18181b 0 18%, #fafaf5 20% 70%, #18181b 72% 100%); }
+.pad.hihat, .pad.crash, .pad.ride { border: 2px solid #a16207;
+  background: radial-gradient(circle, #713f12 0 4%, #fde68a 5% 14%, transparent 15%),
+    repeating-radial-gradient(circle, #eab308 0 6px, #ca8a04 6px 8px); }
+.zone.hit .pad { transform: scale(1.1); filter: brightness(1.6); opacity: 1; transition: none; }
 
 .hand { position: absolute; width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%;
   border: 3px solid var(--ok); background: rgba(34,197,94,.35); pointer-events: none; }

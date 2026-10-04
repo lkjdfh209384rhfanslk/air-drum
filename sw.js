@@ -1,5 +1,5 @@
 // 오프라인 동작용 캐시. 코드를 수정해 배포할 때는 VERSION을 올린다.
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CACHE = `air-drum-${VERSION}`;
 
 const ASSETS = [
