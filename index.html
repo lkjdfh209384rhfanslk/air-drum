@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="에어드럼">
+  <meta name="theme-color" content="#111111">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+  <title>에어드럼</title>
+</head>
+<body>
+
+  <!-- 카메라 영상 위에 드럼 구역을 겹쳐 보여준다 -->
+  <div id="stage" class="stage">
+    <video id="cam" playsinline muted autoplay></video>
+    <div id="zones" class="zones"></div>
+    <div id="hand-L" class="hand hidden"></div>
+    <div id="hand-R" class="hand hidden"></div>
+  </div>
+
+  <div id="debug" class="debug"></div>
+  <button id="open-settings" class="btn settings-btn">설정</button>
+
+  <aside id="settings" class="panel hidden">
+    <div class="panel-head">
+      <h2>설정</h2>
+      <button id="close-settings" class="btn">닫기</button>
+    </div>
+
+    <div class="row">
+      <label for="thr">타격 기준 <output id="thr-out"></output></label>
+      <div class="meter"><span id="level-fill"></span><i id="level-line"></i></div>
+      <input id="thr" type="range" min="0.02" max="0.6" step="0.01">
+      <p class="hint">막대는 지금 마이크 크기, 세로선이 기준값입니다. 가만히 있을 때는 막대가 선을 넘지 않고, 칠 때만 넘게 맞추세요.</p>
+    </div>
+    <div class="row">
+      <label for="refractoryMs">연타 최소 간격 <output id="refractoryMs-out"></output></label>
+      <input id="refractoryMs" type="range" min="30" max="200" step="10">
+    </div>
+    <div class="row">
+      <label for="guard">스피커 되울림 억제 <output id="guard-out"></output></label>
+      <input id="guard" type="range" min="0" max="0.6" step="0.01">
+      <p class="hint">드럼 소리가 마이크로 되돌아와 혼자 연달아 울리면 올리세요. 너무 높으면 약한 연타를 놓칩니다.</p>
+    </div>
+    <div class="row check">
+      <label><input id="echoCancel" type="checkbox"> 에코 제거 사용 (바꾸면 다시 시작)</label>
+    </div>
+
+    <div class="row">
+      <label for="layout">드럼 배치</label>
+      <select id="layout"></select>
+    </div>
+    <div class="row check">
+      <label><input id="mirror" type="checkbox"> 거울처럼 좌우 반전</label>
+    </div>
+
+    <div class="row">
+      <label for="kickMode">킥 방식</label>
+      <select id="kickMode">
+        <option value="none">사용 안 함</option>
+        <option value="mic">발 소리 (낮은 '쿵' 소리)</option>
+        <option value="knee">무릎 움직임 (카메라)</option>
+        <option value="zone">화면 아래쪽 구역</option>
+      </select>
+    </div>
+    <div class="row">
+      <label for="kickRatio">발 소리: 저음 기준 <output id="kickRatio-out"></output></label>
+      <input id="kickRatio" type="range" min="0.05" max="0.95" step="0.01">
+      <p class="hint">마지막 타격의 저음 비율: <b id="last-low">-</b>. 발로 쳤을 때 값과 손으로 쳤을 때 값의 중간쯤으로 맞추세요.</p>
+    </div>
+    <div class="row">
+      <label for="kneeSpeed">무릎: 속도 기준 <output id="kneeSpeed-out"></output></label>
+      <input id="kneeSpeed" type="range" min="0.05" max="1" step="0.01">
+      <p class="hint">무릎이 카메라에 보여야 합니다. 가만히 있는데 울리면 올리세요.</p>
+    </div>
+  </aside>
+
+  <div id="start" class="start">
+    <h1>에어드럼</h1>
+    <p>책상이나 쿠션을 치면 마이크가 타이밍을, 카메라가 손 위치를 읽어 드럼 소리를 냅니다.</p>
+    <button id="start-btn" class="btn primary">시작</button>
+    <p id="start-msg" class="start-msg"></p>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
